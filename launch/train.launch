@@ -1,0 +1,19 @@
+<launch>
+
+  <arg name="launch_prefix" default=" " />
+  <arg name="input_image_topic" default="camera/rgb/image_rect_color" />
+  <arg name="input_bbox_topic" default="/darknet_ros/bounding_boxes" />
+  <arg name="input_keypt_topic" default="/aist_object_pose_estimator/reproj/out_points" />
+  
+    <node pkg="train_hg" type="train" name="train_keypoints" output="screen" launch-prefix="$(arg launch_prefix)">
+
+    	<!-- subscribed topics -->
+        <remap from="~input_image" to="$(arg input_image_topic)"/>
+  	<remap from="~input_bbox" to="$(arg input_bbox_topic)"/>
+	<remap from="~input_kpts" to="$(arg input_keypt_topic)"/>
+
+    <rosparam subst_value="true">
+    </rosparam>
+    </node>
+
+</launch>
