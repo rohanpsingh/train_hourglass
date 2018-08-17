@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     sensor_msgs
     geometry_msgs
-    detection_hg
+    object_keypoint_msgs
     cv_bridge
     image_transport
     darknet_ros_msgs
@@ -32,6 +32,7 @@ catkin_package(
         sensor_msgs
         geometry_msgs
 	dynamic_reconfigure
+	object_keypoint_msgs	
 )
 
 

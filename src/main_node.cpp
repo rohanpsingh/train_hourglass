@@ -9,7 +9,7 @@
 #include <opencv/cv.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
-#include <opencv_apps/Point2DArrayStamped.h>
+#include <object_keypoint_msgs/ObjectKeyPointArray.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -25,11 +25,6 @@ extern "C" {
     #include <luaT.h>
     #include <TH/TH.h>
 }
-
-//ros pubs
-image_transport::Publisher image_keypoints;
-ros::Publisher keypoint_hms;
-ros::Publisher keypoint_pos;
 
 //lua state
 lua_State *L;
@@ -49,7 +44,7 @@ int max_kps;
 
 void msgCallback(const sensor_msgs::ImageConstPtr& img,
                  const darknet_ros_msgs::BoundingBoxesConstPtr& box,
-                 const opencv_apps::Point2DArrayStampedConstPtr& kpa){
+                 const object_keypoint_msgs::ObjectKeyPointArrayConstPtr& kpa){
 
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
@@ -60,8 +55,6 @@ void msgCallback(const sensor_msgs::ImageConstPtr& img,
     catch (cv_bridge::Exception& e){
       ROS_ERROR("Could not convert from '%s' to 'bgr8'.", img->encoding.c_str());
     }
-//    read_image = cv::Mat::zeros(256,256,CV_32FC3);
-//    read_image = cv::imread("/home/rohan/123.png", CV_LOAD_IMAGE_COLOR);
     read_image.convertTo(image, CV_32FC3);
 
     cv::Mat img_bgr[3];
@@ -96,10 +89,6 @@ void msgCallback(const sensor_msgs::ImageConstPtr& img,
     const int xmax = box->bounding_boxes[0].xmax;
     const int ymin = box->bounding_boxes[0].ymin;
     const int ymax = box->bounding_boxes[0].ymax;
-//    const int xmin = 0;
-//    const int xmax = 256;
-//    const int ymin = 0;
-//    const int ymax = 256;
     int cx = abs(xmax+xmin)/2;
     int cy = abs(ymax+ymin)/2;
     float scale = std::max(xmax-xmin, ymax-ymin);
@@ -119,22 +108,16 @@ void msgCallback(const sensor_msgs::ImageConstPtr& img,
     lua_setglobal(L,"input_center_y");
 
 
-//    opencv_apps::Point2DArrayStamped dum;
-//    opencv_apps::Point2D op;
-//    op.x = 100; op.y = 1; dum.points.push_back(op);
-//    op.x = 2; op.y = 3; dum.points.push_back(op);
-//    op.x = 4; op.y = 5; dum.points.push_back(op);
-//    op.x = 6; op.y = 7; dum.points.push_back(op);
-//    op.x = 8; op.y = 9; dum.points.push_back(op);
     lua_getglobal(L,"input_parts");
-    double* keypt_data = new double[kpa->points.size()*2*sizeof(double)];
-    for(unsigned int i = 0; i < kpa->points.size()*2; i++) {
-        keypt_data[i] = kpa->points[i/2].x;
-        keypt_data[i+1] = kpa->points[i/2].y;
+    unsigned int num_kpts = kpa->object[0].keypoint.size();
+    double* keypt_data = new double[num_kpts*2*sizeof(double)];
+    for(unsigned int i = 0; i < num_kpts*2; i++) {
+        keypt_data[i] = kpa->object[0].keypoint[i/2].position.x;
+        keypt_data[i+1] = kpa->object[0].keypoint[i/2].position.y;
         i++;
     }
-    THDoubleStorage* kptStorage = THDoubleStorage_newWithData(keypt_data, kpa->points.size()*2);
-    THDoubleTensor* kptTensor = THDoubleTensor_newWithStorage2d(kptStorage, 0, kpa->points.size(), 2, 2, 1);
+    THDoubleStorage* kptStorage = THDoubleStorage_newWithData(keypt_data, num_kpts*2);
+    THDoubleTensor* kptTensor = THDoubleTensor_newWithStorage2d(kptStorage, 0, num_kpts, 2, 2, 1);
     luaT_pushudata(L, (void*)kptTensor, "torch.DoubleTensor");
     lua_setglobal(L,"input_parts");
 
@@ -143,71 +126,9 @@ void msgCallback(const sensor_msgs::ImageConstPtr& img,
     lua_getglobal(L, "init");
     lua_pcall(L,0,0,0);
 
-
     lua_getglobal(L, "trainOnThis");
     lua_pcall(L,0,0,0);
 
-/*
-    lua_getglobal(L, "keypoint_locs");
-    THFloatTensor* keypointTensor = (THFloatTensor*)luaT_toudata(L, -1, "torch.FloatTensor");
-    float* kpts = THFloatTensor_data(keypointTensor);
-    int num_of_keypoint_vis = THFloatTensor_size(keypointTensor,0);
-
-    lua_getglobal(L, "heatmap_peaks");
-    THFloatTensor* hmpeaksTensor = (THFloatTensor*)luaT_toudata(L, -1, "torch.FloatTensor");
-    float* hmps = THFloatTensor_data(hmpeaksTensor);
-    if (THFloatTensor_size(hmpeaksTensor,0) != max_kps) {
-        ROS_ERROR("something terrible has happened!!");
-        return;
-    }
-    std::vector<float> hm_peaks_vec;
-    for (unsigned int i = 0; i < max_kps; i++)
-      hm_peaks_vec.push_back(*(hmps+i));
-    
-    opencv_apps::Point2DArrayStamped pt_array_msg;
-    cv::Mat keypoint_img = read_image.clone();
-    for (unsigned int i = 0; i < num_of_keypoint_vis*2; i++) {
-        if (vis_kp_ind != -1)
-            if ((i/2) != vis_kp_ind)
-                continue;
-        cv::Point pt;
-        pt.x = *(kpts+i);
-        pt.y = *(kpts+i+1);
-        float rd = circle_rad;
-        if (pt != cv::Point(-1,-1)) {
-            cv::circle(keypoint_img, pt, rd, cv::Scalar(0,255,0), -1);
-            cv::putText(keypoint_img, std::to_string(i/2), pt, cv::FONT_HERSHEY_SIMPLEX, font_scale, cv::Scalar(255,0,0), font_thick);
-        }
-
-        opencv_apps::Point2D op;
-        op.x = pt.x;
-        op.y = pt.y;
-        pt_array_msg.points.push_back(op);
-        i++;
-    }
-
-    pt_array_msg.header.stamp = img->header.stamp;
-    keypoint_pos.publish(pt_array_msg);
-
-    if (vis_out) {
-        sensor_msgs::ImagePtr img_pub_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", keypoint_img).toImageMsg();
-        image_keypoints.publish(img_pub_msg);
-    }
-    if (pub_hms) {
-        detection_hg::KeyPointConfidenceArray kp_msg;
-        std_msgs::Float32MultiArray hm_msg;
-        hm_msg.layout.dim.push_back(std_msgs::MultiArrayDimension());
-      	hm_msg.layout.dim[0].label = "kp_peaks";
-        hm_msg.layout.dim[0].size = max_kps;
-        hm_msg.layout.dim[0].stride = 1;
-        hm_msg.layout.data_offset = 0;
-        hm_msg.data = hm_peaks_vec;
-	kp_msg.array = hm_msg;
-	kp_msg.header = img->header;
-        keypoint_hms.publish(kp_msg);
-    }
-
-*/
     lua_gc(L, LUA_GCCOLLECT, 0);
     lua_settop(L, 0);
 
@@ -242,18 +163,12 @@ int main (int argc, char** argv){
         exit(1);
     }
 
-//    msgCallback(sensor_msgs::ImageConstPtr(), darknet_ros_msgs::BoundingBoxesConstPtr(), opencv_apps::Point2DArrayStampedConstPtr());
-//    image_keypoints = image_transport::ImageTransport(priv_nh).advertise("keypoints",1);
-//    keypoint_pos = priv_nh.advertise<opencv_apps::Point2DArrayStamped>("keypoint_pos", 1);
-//    keypoint_hms = priv_nh.advertise<detection_hg::KeyPointConfidenceArray>("keypoint_hms", 1);
-
-
     message_filters::Subscriber<sensor_msgs::Image> img_sub(priv_nh, "input_image", 1);
     message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> box_sub(priv_nh, "input_bbox", 1);
-    message_filters::Subscriber<opencv_apps::Point2DArrayStamped> kpa_sub(priv_nh, "input_kpts", 1);
+    message_filters::Subscriber<object_keypoint_msgs::ObjectKeyPointArray> kpa_sub(priv_nh, "input_kpts", 1);
     typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
                                                             darknet_ros_msgs::BoundingBoxes,
-                                                            opencv_apps::Point2DArrayStamped> SyncPolicy;
+                                                            object_keypoint_msgs::ObjectKeyPointArray> SyncPolicy;
     message_filters::Synchronizer<SyncPolicy> sync(SyncPolicy(100), img_sub, box_sub, kpa_sub);
     sync.registerCallback(boost::bind(&msgCallback, _1, _2, _3));
 
