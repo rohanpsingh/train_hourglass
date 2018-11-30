@@ -146,22 +146,32 @@ int main (int argc, char** argv){
     ros::NodeHandle priv_nh("~");
 
     std::string pkg_dir;
-    priv_nh.param("pkg_dir", pkg_dir, std::string("/home/rohan/rohan_m15x/ros_ws/src/train_hg/src/"));
+    std::string save_path;
+    priv_nh.param("pkg_dir", pkg_dir, std::string("/home/rohan/rohan_m15x/ros_ws/src/train_hg"));
+    priv_nh.param("save_path", save_path, std::string("/home/rohan/tmp/train_weights"));
 
     L = luaL_newstate();
     std::cout << "------lua loading libraries----- " << std::endl;
     luaL_openlibs(L);
     int status;
-    status = luaL_loadfile(L, std::string(pkg_dir + "lua/init.lua").c_str());
+    status = luaL_loadfile(L, std::string(pkg_dir + "/src/lua/init.lua").c_str());
     if (lua_pcall(L, 0, LUA_MULTRET, 0)) {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
         exit(1);
     }
-    status = luaL_loadfile(L, std::string(pkg_dir + "lua/main.lua").c_str());
+    status = luaL_loadfile(L, std::string(pkg_dir + "/src/lua/main.lua").c_str());
     if (lua_pcall(L, 0, LUA_MULTRET, 0)) {
         fprintf(stderr, "Failed to run script: %s\n", lua_tostring(L, -1));
         exit(1);
     }
+    std::cout << "------setting parameters----- " << std::endl;
+    lua_getglobal(L,"savePath_");
+    lua_pushstring(L, save_path.c_str());
+    lua_setglobal(L,"savePath_");
+
+    lua_getglobal(L, "init");
+    lua_pcall(L,0,0,0);
+
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub(priv_nh, "input_image", 1);
     message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> box_sub(priv_nh, "input_bbox", 1);

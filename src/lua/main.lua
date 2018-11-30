@@ -27,6 +27,7 @@ end
 
 
 function init()
+    os.execute('mkdir -p ' .. savePath_)
     input_image = torch.cat(inImage_c3, inImage_c2, 3):cat(inImage_c1, 3)
     save_sample_image(input_image, 'sample_image.jpg')
     annot.part = input_parts
