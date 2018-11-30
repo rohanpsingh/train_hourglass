@@ -18,6 +18,9 @@
    <rosparam subst_value="true">
    pkg_dir: $(arg pkg_dir)
    save_path: $(arg weight_save_path)
+   num_key_points: 20
+   learning_rate: 0.00025
+   decay_rate: 0
    </rosparam>
    </node>
 

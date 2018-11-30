@@ -147,8 +147,14 @@ int main (int argc, char** argv){
 
     std::string pkg_dir;
     std::string save_path;
+    int num_key_points;
+    double learning_rate;
+    double decay_rate;
     priv_nh.param("pkg_dir", pkg_dir, std::string("/home/rohan/rohan_m15x/ros_ws/src/train_hg"));
     priv_nh.param("save_path", save_path, std::string("/home/rohan/tmp/train_weights"));
+    priv_nh.param("num_key_points", num_key_points, int(20));
+    priv_nh.param("learning_rate", learning_rate, double(0.00025));
+    priv_nh.param("decay_rate", decay_rate, double(0));
 
     L = luaL_newstate();
     std::cout << "------lua loading libraries----- " << std::endl;
@@ -165,13 +171,18 @@ int main (int argc, char** argv){
         exit(1);
     }
     std::cout << "------setting parameters----- " << std::endl;
-    lua_getglobal(L,"savePath_");
+    lua_getglobal(L, "savePath_");
     lua_pushstring(L, save_path.c_str());
-    lua_setglobal(L,"savePath_");
-
-    lua_getglobal(L, "init");
-    lua_pcall(L,0,0,0);
-
+    lua_setglobal(L, "savePath_");
+    lua_getglobal(L, "optNumParts_");
+    lua_pushnumber(L, num_key_points);
+    lua_setglobal(L, "optNumParts_");
+    lua_getglobal(L, "optLR_");
+    lua_pushnumber(L, learning_rate);
+    lua_setglobal(L, "optLR_");
+    lua_getglobal(L, "optLRdecay_");
+    lua_pushnumber(L, decay_rate);
+    lua_setglobal(L, "optLRdecay_");
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub(priv_nh, "input_image", 1);
     message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> box_sub(priv_nh, "input_bbox", 1);
