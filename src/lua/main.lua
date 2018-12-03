@@ -21,7 +21,7 @@ function save_sample_image(inimage, filename)
     local rgb = inimage:permute(3,1,2)
     local img = image.minmax{tensor = rgb}
     local out = image.toDisplayTensor{img}
-    local img_save_path = paths.concat(os.getenv('HOME'),'tmp/train_weights/', filename)
+    local img_save_path = paths.concat(savePath_, filename)
     image.save(img_save_path, out)
 end
 
