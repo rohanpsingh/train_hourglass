@@ -31,9 +31,11 @@ function loadData(input_image, in_pts, in_c, in_s)
     local r = torch.randn(1):mul(optRotFactor_):clamp(-2*optRotFactor_,2*optRotFactor_)
 
     -- Color
-    input[{1, 1, {}, {}}]:mul(torch.uniform(0.8, 1.2)):clamp(0, 1)
-    input[{1, 2, {}, {}}]:mul(torch.uniform(0.8, 1.2)):clamp(0, 1)
-    input[{1, 3, {}, {}}]:mul(torch.uniform(0.8, 1.2)):clamp(0, 1)
+    local lo_lim = 1 - optColorVar_;
+    local up_lim = 1 + optColorVar_;
+    input[{1, 1, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
+    input[{1, 2, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
+    input[{1, 3, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
 
     -- Scale/rotation
     if torch.uniform() <= .6 then r[1] = 0 end
@@ -41,11 +43,13 @@ function loadData(input_image, in_pts, in_c, in_s)
     input[1] = crop(input[1], {(inp+1)/2,(inp+1)/2}, inp*s[1]/200, r[1], inp)
     label[1] = crop(label[1], {(out+1)/2,(out+1)/2}, out*s[1]/200, r[1], out)
 
+--[=====[ -- avoid flipping due to labelling ambiguity
     -- Flip
     if torch.uniform() <= .5 then
         input = flip(input)
         label = flip(label)
     end
+--]=====]
 
     if preprocess then input,label = preprocess(input,label) end
 

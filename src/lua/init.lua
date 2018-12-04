@@ -21,6 +21,7 @@ nStack_ = 2
 useGPU_ = 1
 snapWeight_ = 1000
 savePath_ = paths.concat(os.getenv('HOME'),'tmp/train_weights')
+optColorVar_ = 0.2
 
 inImage_c1 = torch.DoubleTensor()
 inImage_c2 = torch.DoubleTensor()
