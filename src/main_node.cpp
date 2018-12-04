@@ -15,9 +15,6 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include <dynamic_reconfigure/server.h>
-#include <detection_hg/paramConfig.h>
-
 extern "C" {
     #include <lua.h>
     #include <lualib.h>
@@ -28,13 +25,6 @@ extern "C" {
 
 //lua state
 lua_State *L;
-
-//ros dynamic params
-float min_hm_thresh;
-float font_scale;
-int font_thick;
-int circle_rad;
-int vis_kp_ind;
 
 //rosparams
 bool vis_out;

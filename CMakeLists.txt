@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     image_transport
     darknet_ros_msgs
-    dynamic_reconfigure
     )
 find_package(OpenCV REQUIRED)
 
@@ -31,7 +30,6 @@ catkin_package(
         std_msgs
         sensor_msgs
         geometry_msgs
-	dynamic_reconfigure
 	object_keypoint_msgs	
 )
 
