@@ -140,11 +140,13 @@ int main (int argc, char** argv){
     int num_key_points;
     double learning_rate;
     double decay_rate;
+    double color_var;
     priv_nh.param("pkg_dir", pkg_dir, std::string("/home/rohan/rohan_m15x/ros_ws/src/train_hg"));
     priv_nh.param("save_path", save_path, std::string("/home/rohan/tmp/train_weights"));
     priv_nh.param("num_key_points", num_key_points, int(20));
     priv_nh.param("learning_rate", learning_rate, double(0.00025));
     priv_nh.param("decay_rate", decay_rate, double(0));
+    priv_nh.param("color_var", color_var, double(0.2));
 
     L = luaL_newstate();
     std::cout << "------lua loading libraries----- " << std::endl;
@@ -173,6 +175,10 @@ int main (int argc, char** argv){
     lua_getglobal(L, "optLRdecay_");
     lua_pushnumber(L, decay_rate);
     lua_setglobal(L, "optLRdecay_");
+    lua_getglobal(L, "optColorVar_");
+    lua_pushnumber(L, color_var);
+    lua_setglobal(L, "optColorVar_");
+
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub(priv_nh, "input_image", 1);
     message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> box_sub(priv_nh, "input_bbox", 1);
