@@ -37,5 +37,5 @@ catkin_package(
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable(train src/main_node.cpp)
+add_executable(train src/main_node.cpp src/ros_utils.cpp src/lua_utils.cpp)
 target_link_libraries(train ${catkin_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} opencv_core opencv_highgui ${LUA_LIBRARY})
