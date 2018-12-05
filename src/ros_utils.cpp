@@ -17,9 +17,6 @@ void setRosParameters(const ros::NodeHandle& nh){
     nh.param("decay_rate", decay_rate, double(0));
     nh.param("color_var", color_var, double(0.2));
 
-    initializeLua();
-    setLuaParameters();
-
     return;
 }
 

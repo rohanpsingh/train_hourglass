@@ -1,5 +1,6 @@
 #include "common_headers.h"
 #include "ros_utils.h"
+#include "lua_utils.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -12,6 +13,9 @@ int main (int argc, char** argv){
     ros::NodeHandle nh("~");
 
     setRosParameters(nh);
+    initializeLua();
+    setLuaParameters();
+
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub(nh, "input_image", 1);
     message_filters::Subscriber<darknet_ros_msgs::BoundingBoxes> box_sub(nh, "input_bbox", 1);
