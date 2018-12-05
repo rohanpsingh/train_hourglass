@@ -4,7 +4,7 @@ paths.dofile('model.lua')   -- Read in network model
 paths.dofile('train.lua')   -- Load up training/testing functions
 
 --[=====[
-function false_init()
+function loadPseudoData()
     input_image = image.lena()
     input_scale = 1.444
     input_parts = torch.DoubleTensor({{100,1},{2,3},{4,5},{6,7},{8,9}})
@@ -26,7 +26,7 @@ function save_sample_image(inimage, filename)
 end
 
 
-function init()
+function loadInputData()
     os.execute('mkdir -p ' .. savePath_)
     input_image = torch.cat(inImage_c3, inImage_c2, 3):cat(inImage_c1, 3)
     save_sample_image(input_image, 'sample_image.jpg')

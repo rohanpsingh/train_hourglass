@@ -114,7 +114,7 @@ void setInputKeyPoints(const int& num_kpts, double* keypt_data){
 
 void luaCallback(){
     lua_pcall(L,3,0,1);
-    lua_getglobal(L, "init");
+    lua_getglobal(L, "loadInputData");
     lua_pcall(L,0,0,0);
 
     lua_getglobal(L, "trainOnThis");
