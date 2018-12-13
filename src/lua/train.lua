@@ -36,7 +36,7 @@ function train(input,label)
     local acc = accuracy(output, label)
     local loss = err
 
-    print("Accuracy: ", acc, "   Loss: ", loss)
+    print("Accuracy: ", acc, "   Loss: ", loss, "   Iteration: ", iternum)
 
 
     if snapWeight_ ~= 0 and iternum % snapWeight_ == 0 then
