@@ -14,34 +14,37 @@ local function print_dims(prefix,d)
     print(prefix .. s)
 end
 
-function loadData(input_image, in_pts, in_c, in_s)
+function loadAndAugmentData(input_image, in_pts, in_c, in_s)
     -- Load in a mini-batch of data
     local input,label
 
-    input = torch.Tensor(1, unpack(dataDim))
-    label = torch.Tensor(1, unpack(labelDim))
-
-    input[1],label[1] = generateSample(input_image, in_pts, in_c, in_s)
+    input = torch.Tensor(optBatchSize_, unpack(dataDim))
+    label = torch.Tensor(optBatchSize_, unpack(labelDim))
+    for i = 1, optBatchSize_ do    
+        input[i],label[i] = generateSample(input_image[i], in_pts, in_c, in_s)
+    end	
 
     if input:max() > 2 then
        input:div(255)
     end
 
-    local s = torch.randn(1):mul(optScaleFactor_):add(1):clamp(1-optScaleFactor_,1+optScaleFactor_)
-    local r = torch.randn(1):mul(optRotFactor_):clamp(-2*optRotFactor_,2*optRotFactor_)
+    local s = torch.randn(optBatchSize_):mul(optScaleFactor_):add(1):clamp(1-optScaleFactor_,1+optScaleFactor_)
+    local r = torch.randn(optBatchSize_):mul(optRotFactor_):clamp(-2*optRotFactor_,2*optRotFactor_)
 
-    -- Color
-    local lo_lim = 1 - optColorVar_;
-    local up_lim = 1 + optColorVar_;
-    input[{1, 1, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
-    input[{1, 2, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
-    input[{1, 3, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
+    for i = 1, optBatchSize_ do
+        -- Color
+    	local lo_lim = 1 - optColorVar_;
+	local up_lim = 1 + optColorVar_;
+	input[{i, 1, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
+    	input[{i, 2, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
+    	input[{i, 3, {}, {}}]:mul(torch.uniform(lo_lim, up_lim)):clamp(0, 1)
 
-    -- Scale/rotation
-    if torch.uniform() <= .6 then r[1] = 0 end
-    local inp,out = optInputRes_, optOutputRes_
-    input[1] = crop(input[1], {(inp+1)/2,(inp+1)/2}, inp*s[1]/200, r[1], inp)
-    label[1] = crop(label[1], {(out+1)/2,(out+1)/2}, out*s[1]/200, r[1], out)
+    	-- Scale/rotation
+    	if torch.uniform() <= .6 then r[1] = 0 end
+    	local inp,out = optInputRes_, optOutputRes_
+    	input[i] = crop(input[i], {(inp+1)/2,(inp+1)/2}, inp*s[i]/200, r[i], inp)
+    	label[i] = crop(label[i], {(out+1)/2,(out+1)/2}, out*s[i]/200, r[i], out)
+    end
 
 --[=====[ -- avoid flipping due to labelling ambiguity
     -- Flip
@@ -58,13 +61,12 @@ end
 
 
 function preprocessData(input_image, in_pts, in_c, in_s)
-
     local temp_input,temp_label
     if preprocess then
         --print_dims("Original input is a ", dataDim)
         --print_dims("Original output is a ", labelDim)
         --print("After preprocessing ---")
-        temp_input,temp_label = loadData(input_image, in_pts, in_c, in_s)
+        temp_input,temp_label = loadAndAugmentData(input_image, in_pts, in_c, in_s)
 
         -- Input
         if type(temp_input) == "table" then
@@ -93,6 +95,5 @@ function preprocessData(input_image, in_pts, in_c, in_s)
         print_dims("Input is a ", inputDim)
         print_dims("Output is a ", outputDim)
     end
-
     return temp_input, temp_label
 end
