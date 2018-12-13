@@ -12,6 +12,7 @@ extern double learning_rate;
 extern double decay_rate;
 extern double color_var;
 extern int batch_size;
+extern int snap_weight;
 
 
 void setRosParameters(const ros::NodeHandle& nh);

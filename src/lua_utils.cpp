@@ -43,6 +43,9 @@ void setLuaParameters(){
     lua_getglobal(L, "optBatchSize_");
     lua_pushnumber(L, batch_size);
     lua_setglobal(L, "optBatchSize_");
+    lua_getglobal(L, "snapWeight_");
+    lua_pushnumber(L, snap_weight);
+    lua_setglobal(L, "snapWeight_");
 
     return;
 }
