@@ -16,17 +16,17 @@ function loadInputData()
     os.execute('mkdir -p ' .. savePath_)
     local input_image = torch.cat(inImage_c3, inImage_c2, 3):cat(inImage_c1, 3):permute(3,1,2):double()
     input_image_batch = torch.cat(input_image_batch, input_image, 4)
+    input_keypt_batch = torch.cat(input_keypt_batch,input_keypt,3)
+    input_scale_batch = torch.cat(input_scale_batch,torch.DoubleTensor({input_scale}),2)
+    input_center_batch = torch.cat(input_center_batch,torch.DoubleTensor({input_center_x, input_center_y}),2)
     save_sample_image(input_image, 'sample_image.jpg')
-    annot.part = input_parts
-    annot.scale = input_scale
-    annot.center = torch.DoubleTensor({input_center_x, input_center_y})
 end
 
 function trainOnThis()
     -- Main training loop
     local input = torch.DoubleTensor()
     local label = {}
-    input, label = preprocessData(input_image_batch:permute(4,1,2,3), annot.part, annot.center, annot.scale)
+    input, label = preprocessData(input_image_batch:permute(4,1,2,3), input_keypt_batch:permute(3,1,2), input_center_batch:permute(2,1), input_scale_batch:permute(2,1))
     save_sample_image(input[1], 'processed.jpg')
     train(input, label)
     collectgarbage()

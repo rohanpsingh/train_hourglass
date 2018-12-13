@@ -102,11 +102,11 @@ void setInputBox(const int& xmin, const int& xmax, const int& ymin, const int& y
 
 
 void setInputKeyPoints(const int& num_kpts, double* keypt_data){
-    lua_getglobal(L,"input_parts");
+    lua_getglobal(L,"input_keypt");
     THDoubleStorage* kptStorage = THDoubleStorage_newWithData(keypt_data, num_kpts*2);
     THDoubleTensor* kptTensor = THDoubleTensor_newWithStorage2d(kptStorage, 0, num_kpts, 2, 2, 1);
     luaT_pushudata(L, (void*)kptTensor, "torch.DoubleTensor");
-    lua_setglobal(L,"input_parts");
+    lua_setglobal(L,"input_keypt");
 
     return;
 }

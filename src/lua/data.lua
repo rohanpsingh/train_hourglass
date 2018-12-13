@@ -21,7 +21,7 @@ function loadAndAugmentData(input_image, in_pts, in_c, in_s)
     input = torch.Tensor(optBatchSize_, unpack(dataDim))
     label = torch.Tensor(optBatchSize_, unpack(labelDim))
     for i = 1, optBatchSize_ do    
-        input[i],label[i] = generateSample(input_image[i], in_pts, in_c, in_s)
+        input[i],label[i] = generateSample(input_image[i], in_pts[i], in_c[i], in_s[i][1])
     end	
 
     if input:max() > 2 then

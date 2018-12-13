@@ -29,15 +29,16 @@ inImage_c1 = torch.DoubleTensor()
 inImage_c2 = torch.DoubleTensor()
 inImage_c3 = torch.DoubleTensor()
 input_image_batch = torch.DoubleTensor()
-unsqueeze = nn.Unsqueeze(1)
 
-input_parts = torch.DoubleTensor()
+input_keypt = torch.DoubleTensor()
 input_scale = 0
 input_center_x = 0
 input_center_y = 0
+input_scale_batch = torch.DoubleTensor()
+input_keypt_batch = torch.DoubleTensor()
+input_center_batch = torch.DoubleTensor()
 
 
-annot = {}
 optimState = {}
 
 iternum = 1
