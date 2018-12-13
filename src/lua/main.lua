@@ -14,6 +14,7 @@ end
 
 function loadInputData()
     os.execute('mkdir -p ' .. savePath_)
+    print('Batch size:  ', optBatchSize_)
     local input_image = torch.cat(inImage_c3, inImage_c2, 3):cat(inImage_c1, 3):permute(3,1,2):double()
     input_image_batch = torch.cat(input_image_batch, input_image, 4)
     input_keypt_batch = torch.cat(input_keypt_batch,input_keypt,3)

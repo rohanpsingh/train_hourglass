@@ -6,6 +6,7 @@ int num_key_points;
 double learning_rate;
 double decay_rate;
 double color_var;
+int batch_size;
 
 
 void setRosParameters(const ros::NodeHandle& nh){
@@ -16,6 +17,7 @@ void setRosParameters(const ros::NodeHandle& nh){
     nh.param("learning_rate", learning_rate, double(0.00025));
     nh.param("decay_rate", decay_rate, double(0));
     nh.param("color_var", color_var, double(0.2));
+    nh.param("batch_size", batch_size, int(1));
 
     return;
 }

@@ -40,6 +40,9 @@ void setLuaParameters(){
     lua_getglobal(L, "optColorVar_");
     lua_pushnumber(L, color_var);
     lua_setglobal(L, "optColorVar_");
+    lua_getglobal(L, "optBatchSize_");
+    lua_pushnumber(L, batch_size);
+    lua_setglobal(L, "optBatchSize_");
 
     return;
 }
