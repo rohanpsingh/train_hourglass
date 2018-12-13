@@ -14,7 +14,7 @@ paths.dofile('util/img.lua')
 paths.dofile('util/eval.lua')
 
 torch.setnumthreads(1)
-torch.setdefaulttensortype('torch.FloatTensor')
+torch.setdefaulttensortype('torch.DoubleTensor')
 
 if useGPU_ == -1 then
     nnlib = nn
@@ -47,4 +47,3 @@ function applyFn(fn, t, t2)
     else t_ = fn(t, t2) end
     return t_
 end
-
