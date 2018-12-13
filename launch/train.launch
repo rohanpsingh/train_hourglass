@@ -22,7 +22,7 @@
    learning_rate: 0.00025
    decay_rate: 0
    color_var: 0.2
-   batch_size: 1
+   batch_size: 4
    </rosparam>
    </node>
 

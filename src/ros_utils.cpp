@@ -46,10 +46,13 @@ void msgCallback(const sensor_msgs::ImageConstPtr& img,
         i++;
     }
 
-    setInputImage(read_image);
-    setInputBox(bbox.xmin, bbox.xmax, bbox.ymin, bbox.ymax);
-    setInputKeyPoints(keypt_num, keypt_array);
-    luaCallback();
+    for (unsigned int i = 0; i < batch_size; i++){
+      setInputImage(read_image);
+      setInputBox(bbox.xmin, bbox.xmax, bbox.ymin, bbox.ymax);
+      setInputKeyPoints(keypt_num, keypt_array);
+      loadLuaInputData();
+    }
+    trainOnBatch();
 
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
